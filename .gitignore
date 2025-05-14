@@ -1,0 +1,45 @@
+# === GLOBAL IGNORE ===
+.DS_Store
+Thumbs.db
+node_modules/
+.env
+.env.local
+.env.production
+.env.development
+
+# === BACKEND / Spring Boot ===
+/backend/target/
+*.log
+*.jar
+*.war
+*.iml
+*.h2.db
+*.mv.db
+/backend/.idea/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.vscode/
+backend/application.properties
+backend/application.yml
+
+# === FRONTEND ADMIN / Next.js ===
+/frontend/frontend-admin/.next/
+/frontend/frontend-admin/node_modules/
+/frontend/frontend-admin/.env*
+/frontend/frontend-admin/.vscode/
+
+# === FRONTEND MOBILE / Expo React Native ===
+/frontend/frontend-mobile/node_modules/
+/frontend/frontend-mobile/.expo/
+/frontend/frontend-mobile/.expo-shared/
+/frontend/frontend-mobile/.vscode/
+/frontend/frontend-mobile/dist/
+/frontend/frontend-mobile/web-build/
+/frontend/frontend-mobile/.env*
+
+# iOS / Android builds (si jamais tu en fais)
+*.apk
+*.ipa
+android/
+ios/
