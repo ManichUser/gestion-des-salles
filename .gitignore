@@ -43,3 +43,27 @@ backend/application.yml
 *.ipa
 android/
 ios/
+# Node
+node_modules/
+.env
+.expo/
+.expo-shared/
+.vscode/
+*.log
+
+# Build
+dist/
+build/
+.next/
+
+# iOS / Android (expo eject)
+android/
+ios/
+
+# macOS
+.DS_Store
+
+# Spring Boot
+**/target/
+**/*.iml
+**/.mvn/
