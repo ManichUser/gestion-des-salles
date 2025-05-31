@@ -9,6 +9,7 @@ import com.example.authentification_test.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class TokenService {
     @Value("${jwt.refresh.expiration}")
     private int refreshTokenDurationMs;
 
+    @Transactional
     public RefreshToken createRefreshToken(User user){
         refreshTokenRespository.deleteByUser(user); //one token per user
 

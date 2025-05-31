@@ -5,6 +5,7 @@ import com.example.authentification_test.dto.LoginRequest;
 import com.example.authentification_test.dto.RegisterRequest;
 import com.example.authentification_test.model.RefreshToken;
 import com.example.authentification_test.model.Role;
+import com.example.authentification_test.model.Status;
 import com.example.authentification_test.model.User;
 import com.example.authentification_test.respository.UserRespository;
 import com.example.authentification_test.security.JwtService;
@@ -46,6 +47,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.SIMPLE_USER);
         user.setEnabled(true);
+        user.setStatus(Status.PASSIF);
         userRespository.save(user);
 
         String token = jwtService.generateToken(user);
