@@ -4,20 +4,16 @@ import com.example.classroom_service.model.Classroom;
 import com.example.classroom_service.model.Classroom.StatutSalle;
 import com.example.classroom_service.repository.ClassroomRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
-
-    public ClassroomServiceImpl(ClassroomRepository classroomRepository) {
-        this.classroomRepository = classroomRepository;
-    }
 
     @Override
     public Classroom createRoom(Classroom classroom) {
