@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@Table(name = "app_users")
+@Table(name = "Users")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -25,7 +25,7 @@ public class User {
 
     private String Filiere;
 
-    private String Niveau;
+    private String  Niveau;
     private boolean enabled = true;
 
     @Enumerated(EnumType.STRING)
