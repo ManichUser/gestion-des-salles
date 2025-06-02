@@ -1,6 +1,7 @@
 package com.example.authentification_test.config;
 
 import com.example.authentification_test.model.Role;
+import com.example.authentification_test.model.Status;
 import com.example.authentification_test.respository.UserRespository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ public class AdminIntializer {
                 admin.setPassword(passwordEncoder.encode("1234admin"));
                 admin.setRole(Role.ADMIN);
                 admin.setEnabled(true);
+                admin.setStatus(Status.ACTIF);
                 userRespository.save(admin);
 
                 System.out.println("Admin created");

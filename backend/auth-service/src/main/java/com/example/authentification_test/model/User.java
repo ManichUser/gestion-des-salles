@@ -29,5 +29,5 @@ public class User {
     private boolean enabled = true;
 
     @Enumerated(EnumType.STRING)
-    private Status status=Status.PASSIF;
+    private Status status;
 }

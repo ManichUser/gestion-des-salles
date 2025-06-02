@@ -5,6 +5,7 @@ import com.example.authentification_test.model.Role;
 import com.example.authentification_test.model.Status;
 import com.example.authentification_test.model.User;
 import com.example.authentification_test.respository.UserRespository;
+import com.example.authentification_test.service.AdminService;
 import com.example.authentification_test.service.AuthService;
 import com.example.authentification_test.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,12 +22,14 @@ public class AuthController {
     private final AuthService authService;
     private final UserRespository userRespository;
     private final TokenService tokenService;
+    private final AdminService adminService;
 
-    public AuthController(AuthService authService, UserRespository userRespository, TokenService tokenService) {
+    public AuthController(AuthService authService, UserRespository userRespository, TokenService tokenService,AdminService adminService) {
 
         this.authService = authService;
         this.userRespository = userRespository;
         this.tokenService = tokenService;
+        this.adminService=adminService;
     }
 
     @PostMapping("/register")
@@ -47,11 +50,8 @@ public class AuthController {
     @PutMapping("/role/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestBody RoleUpdateRequest request){
-        User user = userRespository.findById(userId).orElseThrow();
-        user.setRole(request.getRole());
-        userRespository.save(user);
-
-        return ResponseEntity.ok("User role updated to" + request.getRole());
+        User update = adminService.updateUserRole(userId,request.getRole());
+        return ResponseEntity.ok("role updated to 5: " + update);
     }
 
     @PutMapping("/statut/{userId}")
