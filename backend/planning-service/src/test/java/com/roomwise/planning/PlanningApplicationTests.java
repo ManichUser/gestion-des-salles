@@ -1,10 +1,10 @@
-package io.epsi.planning_service;
+package com.roomwise.planning;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PlanningServiceApplicationTests {
+class PlanningApplicationTests {
 
 	@Test
 	void contextLoads() {
