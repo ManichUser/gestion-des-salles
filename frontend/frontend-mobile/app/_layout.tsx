@@ -6,9 +6,9 @@ import 'react-native-reanimated';
 export default function RootLayout() {
 
   return (
-          <Stack initialRouteName='LoginScreen'>
+          <Stack initialRouteName='(tabs)'>
             <Stack.Screen name="(tabs)" options={{headerShown:false}}/>
-            <Stack.Screen name="LoginScreen" options={{headerShown:false}}/>
+            <Stack.Screen name="Login" options={{headerShown:false}}/>
             <Stack.Screen name="Inscription" options={{headerShown:false}}/>
             <Stack.Screen name="+not-found" />
           </Stack>

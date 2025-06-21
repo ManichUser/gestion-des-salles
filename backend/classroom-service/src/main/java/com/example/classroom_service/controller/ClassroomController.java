@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/classrooms")
+@CrossOrigin(origins="*")
 @RequiredArgsConstructor
 public class ClassroomController {
 

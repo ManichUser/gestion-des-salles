@@ -35,7 +35,7 @@ export default function Inscription() {
       try {
         await registerUser(user);
         Alert.alert("Succès", "Inscription réussie !");
-        router.push('/LoginScreen');
+        router.push('/Login');
       } catch (error) {
         Alert.alert("Erreur", "L'inscription a échoué.");
       }
@@ -135,8 +135,8 @@ export default function Inscription() {
             secureTextEntry
             style={styles.input}
             placeholder="Confirmer le Mot de passe"
-            value={user.password}
-            onChangeText={text => setUser({ ...user, password: text })}
+            // value={user.password}
+            // onChangeText={text => setUser({ ...user, password: text })}
             
           />
         </>
@@ -161,7 +161,7 @@ export default function Inscription() {
 
         <View style={styles.footer}>
           <Text>Vous avez déjà un compte ?</Text>
-          <Link href="/LoginScreen"><Text style={{ color: 'blue' }}> Se connecter</Text></Link>
+          <Link href="/Login"><Text style={{ color: 'blue' }}> Se connecter</Text></Link>
         </View>
       </View>
     </Provider>

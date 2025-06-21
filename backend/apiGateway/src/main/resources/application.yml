@@ -1,0 +1,39 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: apiGateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true 
+          lower-case-service-id: true 
+
+      routes:
+        - id: auth-service
+          uri: lb://AUTHENTIFICATION-SERVICE
+          predicates:
+            - Path=/api/auth/**
+
+        - id: vinted-vente
+          uri: lb://VINTED-SERVICE
+          predicates:
+            - Path=/api/vinted/**
+
+        - id: produit-service
+          uri: lb://PRODUIT-SERVICE
+          predicates:
+            - Path=/api/produits/**
+
+        - id: panier-service
+          uri: lb://PANIER-SERVICE
+          predicates:
+            - Path=/api/panier/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
