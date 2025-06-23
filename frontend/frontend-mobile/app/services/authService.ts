@@ -2,9 +2,9 @@ import axios from 'axios';
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = "http://192.168.186.213:8083/api/auth"; // ⚠️ IP locale du backend (doit être visible par téléphone)
+const API_URL = "http://172.26.125.110:8083/api/auth"; // ⚠️ IP locale du backend (doit être visible par téléphone)
 const apiClass = axios.create({
-    baseURL: 'http://192.168.186.213:8084/api', // ton backend
+    baseURL: 'http:/172.26.125.110:8084/api', // ton backend
   });
 
 export const registerUser = async (user: any) => {
