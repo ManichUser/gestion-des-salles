@@ -29,12 +29,15 @@ export default function TabLayout() {
           tabBarIcon:()=><Ionicons name='home-sharp' color={'#0959e4'}  />
         }}
       />
-            <Tabs.Screen
+        <Tabs.Screen
         name="Salle"
         options={{
           title: 'Salles de classe',
           tabBarIcon:()=><Ionicons name='school-sharp' color={'#0959e4'}  />
         }}
+      />
+      <Tabs.Screen
+      name='resservation'
       />
     </Tabs>
   );

@@ -3,9 +3,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getSalleDeClasse } from '../services/authService';
+import { userExample } from '../data/userData';
+import { useSearchParams } from 'expo-router/build/hooks';
 
 export default function HomePage() {
-  const { user } = useLocalSearchParams();
+  const  user :string | null =  userExample.username || useSearchParams().get("user") ;
   const router = useRouter();
   const [salles, setSalles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function HomePage() {
           <Text style={styles.title}>RoomWise</Text>
         </View>
         <View style={{ display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center', height: 40 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{user}</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold',color:'black' }}>{user}</Text>
           <Ionicons name='person-sharp' size={24} />
         </View>
       </View>
