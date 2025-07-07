@@ -33,7 +33,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/auth/login","/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login","/api/auth/register","/api/auth/logout").permitAll()
                         .requestMatchers("/api/auth/role/**","/api/auth/status/**","/api/auth/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

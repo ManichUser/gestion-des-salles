@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@Table(name = "Users")
+@Table(name = "app_users")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -20,12 +20,13 @@ public class User {
     private String email;
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
     private Role role;
 
     private String Filiere;
 
-    private String  Niveau;
+    private String Niveau;
     private boolean enabled = true;
 
     @Enumerated(EnumType.STRING)

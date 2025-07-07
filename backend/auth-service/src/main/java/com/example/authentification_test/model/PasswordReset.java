@@ -6,17 +6,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
-@Table(name = "roles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class PasswordReset {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String name; //Admin,Delegue,User
+    @Column(nullable = false, unique = true)
+    private String token;
+
+    @OneToOne
+    private User user;
+
+    @Column(nullable = false)
+    private Instant expiryDate;
+
+    private boolean used;
 }

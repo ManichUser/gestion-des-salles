@@ -1,5 +1,6 @@
 package com.example.authentification_test.security;
 
+import com.example.authentification_test.service.TokenService;
 import com.example.authentification_test.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,10 +21,12 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
-    public JwtAuthFilter (JwtService jwtService, UserDetailsService userDetailsService){
+    public JwtAuthFilter (JwtService jwtService, UserDetailsService userDetailsService, TokenService tokenService){
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -47,6 +50,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+            if (tokenService.isTokenRevoked(jwt)){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
 
         }

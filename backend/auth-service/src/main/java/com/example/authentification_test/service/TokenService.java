@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +47,27 @@ public class TokenService {
         refreshTokenRespository.delete(token);
     }
 
+    public  void  revokedAllTokenByUser(String jwt){
+        String username = jwtService.extractUsername(jwt);
+        User user = userRespository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        //supression complete (option 1)
+        //refreshTokenRespository.deleteByUser(user);
+
+        //marque comme revoquer pour garder l'historique des token (option 2)
+        List<RefreshToken> tokens = refreshTokenRespository.findAllByUser(user);
+        for (RefreshToken token : tokens){
+            token.setRevokedT(true);
+        }
+        refreshTokenRespository.saveAll(tokens);
+    }
+
+    public boolean isTokenRevoked(String jwt){
+        return refreshTokenRespository.findByToken(jwt)
+                .map(RefreshToken :: isRevokedT)
+                .orElse(true); //considerer invalid par defaut
+    }
     public Optional<AuthResponse>
     refreshToken(String token){
         return refreshTokenRespository.findByToken(token)

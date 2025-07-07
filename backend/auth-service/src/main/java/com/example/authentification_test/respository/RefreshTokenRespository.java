@@ -8,10 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RefreshTokenRespository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);
+    List<RefreshToken> findAllByUser(User user);
 
     @Modifying
     @Transactional
