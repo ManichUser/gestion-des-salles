@@ -11,9 +11,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-   
+  
         headerShown: false,
-     
+    
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
@@ -26,18 +26,22 @@ export default function TabLayout() {
         name="HomePage"
         options={{
           title: 'Acceuil',
-          tabBarIcon:()=><Ionicons name='home-sharp' color={'#0959e4'}  />
+          tabBarIcon:()=><Ionicons name='home-sharp' color={'#0959e4'} size={24} />
         }}
       />
         <Tabs.Screen
         name="Salle"
         options={{
           title: 'Salles de classe',
-          tabBarIcon:()=><Ionicons name='school-sharp' color={'#0959e4'}  />
+          tabBarIcon:()=><Ionicons name='school-sharp' color={'#0959e4'} size={24} />
         }}
       />
       <Tabs.Screen
-      name='resservation'
+      name='Notifications'
+      options={{
+        title:'Notifications',
+        tabBarIcon:()=><Ionicons name='notifications' color={'#0959e4'} size={24} />
+      }}
       />
     </Tabs>
   );

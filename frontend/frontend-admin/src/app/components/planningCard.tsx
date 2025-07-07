@@ -60,8 +60,8 @@ export default function PlanningCard({ planning /*, salles*/ }: PlanningCardProp
             <span className="flex-1 text-left text-gray-700 dark:text-gray-300 mb-1 sm:mb-0">
                 <span className="sm:hidden font-bold">Filière: </span>{planning.proprietaireFiliere}
             </span>
-            <span className="flex-1 text-left lg:pl-4 text-gray-700 dark:text-gray-300 mb-1 sm:mb-0">
-                <span className="sm:hidden font-bold">Niveau: </span>{planning.proprietaireNiveau}
+            <span className="flex-1 text-left lg:pl-8 text-gray-700 dark:text-gray-300 mb-1 sm:mb-0">
+                <span className="sm:hidden  font-bold">Niveau: </span>{planning.proprietaireNiveau}
             </span>
 
             {/* Conteneur des actions, devient flex-row sur mobile et s'aligne à droite sur desktop */}

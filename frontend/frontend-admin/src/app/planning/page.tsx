@@ -4,7 +4,7 @@
 import { useState } from "react"
 import CreatePlanningForm from "../components/CreatePlanningForm";
 import  Filter from "../components/Filter";
-import {  PlanningData,getSalleNomById } from "../data/Planning";
+import {  PlanningData } from "../data/Planning";
 import  PlanningCard from "../components/planningCard";
 
 

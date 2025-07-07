@@ -1,13 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Text, View, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { getSalleDeClasse } from '@/app/services/authService'; 
+import { router } from 'expo-router';
 
 type Salle = {
   id: number;
   nom: string;
   statut: string;
 };
-
+const sampleData:Salle[]=[
+  {
+    id:1,
+    nom:'NS3',
+    statut:'LIBRE'
+  },
+  {
+    id:2,
+    nom:'NS2',
+    statut:'LIBRE'
+  },
+  {
+    id:3,
+    nom:'Amphi 354',
+    statut:'LIBRE'
+  }
+]
 export default function Salle() {
   const [salles, setSalles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +32,7 @@ export default function Salle() {
   useEffect(() => {
     const fetchSalles = async () => {
       try {
-        const data = await getSalleDeClasse();
+        const data:Salle[] = sampleData|| await getSalleDeClasse();
         setSalles(data);
       } catch (err) {
         console.error("Erreur lors de la récupération des salles :", err);
@@ -26,6 +43,9 @@ export default function Salle() {
 
     fetchSalles();
   }, []);
+  const openClass=(salle:Salle)=>{
+    router.push({pathname:`../reservation/${salle.id.toString()}`,params:{nom:salle.nom}})
+  }
 
   const renderSalle = ({ item }: { item: Salle }) => (
     <View style={styles.salleCard}>
@@ -37,8 +57,8 @@ export default function Salle() {
       </View>
 
       {item.statut !== 'OCCUPE' && (
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Réserver</Text>
+        <TouchableOpacity onPress={()=>openClass(item)} style={styles.button}>
+          <Text style={styles.buttonText}>Effectuer une reservation</Text>
         </TouchableOpacity>
       )}
     </View>
