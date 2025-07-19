@@ -9,10 +9,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration; // <-- NOUVEL IMPORT
+import org.springframework.web.cors.CorsConfigurationSource; // <-- NOUVEL IMPORT
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource; // <-- NOUVEL IMPORT
+import java.util.Arrays; // <-- NOUVEL IMPORT
 
 @Configuration
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // Nouvelle syntaxe
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <-- AJOUTEZ CETTE LIGNE POUR CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -33,8 +37,17 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/auth/login","/api/auth/register").permitAll()
-                        .requestMatchers("/api/auth/role/**","/api/auth/status/**","/api/auth/users/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/logout",
+                                "/api/auth/refresh", // Permettre le refresh token aussi
+                                "/api/auth/forgot-password", // Permettre l'accès à ces endpoints
+                                "/api/auth/reset-password",  // sans authentification
+                                "/api/classrooms/**",        // Si vos endpoints de salles sont publics
+                                "/api/statiqueplannings/**"  // Si vos endpoints de plannings sont publics
+                        ).permitAll()
+                        .requestMatchers("/api/auth/role/**", "/api/auth/statut/**", "/api/auth/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess
@@ -42,10 +55,25 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        //pour acceder a la h2 en memoire
+
+        // pour acceder a la h2 en memoire
         http.headers(AbstractHttpConfigurer::disable);
 
         return http.build();
+    }
+
+    // NOUVEAU BEAN POUR LA CONFIGURATION CORS
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // REMPLACEZ "http://localhost:3000" par l'origine exacte de votre application Next.js
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // L'URL de votre frontend
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Méthodes HTTP autorisées
+        configuration.setAllowedHeaders(Arrays.asList("*")); // Autorise tous les en-têtes
+        configuration.setAllowCredentials(true); // Autorise l'envoi de cookies et d'en-têtes d'autorisation
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Applique cette configuration CORS à TOUS les chemins (/**)
+        return source;
     }
 
     @Bean

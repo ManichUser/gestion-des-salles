@@ -20,10 +20,12 @@ export default function CreateSalle( {visible}){
             e.preventDefault()
             try{
                 const reponse=await postSalleDeClasse(formData);
-                alert("Ajout effectuer avec succes:"+reponse)
-                router.push('/salles')
+                router.refresh()
+                alert("Ajout effectuer avec succes:"+formData.nom+reponse)
+                
+            
             } catch (err:any){
-                alert("l'ajout a echoue "+err?.toString())
+                alert("l'ajout a echoue "+formData.nom+ err?.toString())
             }
         }
     return (

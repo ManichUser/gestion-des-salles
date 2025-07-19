@@ -27,7 +27,7 @@ export default function Login(){
   
       router.push({
         pathname: "./(tabs)/HomePage",
-        params: { user: username  ||  response.email },
+        params: { user: username  ||  response.username },
       });
     } catch (err: any) {
       console.error("Erreur login:", err);

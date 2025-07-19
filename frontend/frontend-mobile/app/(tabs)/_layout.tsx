@@ -29,6 +29,7 @@ export default function TabLayout() {
           tabBarIcon:()=><Ionicons name='home-sharp' color={'#0959e4'} size={24} />
         }}
       />
+
         <Tabs.Screen
         name="Salle"
         options={{
@@ -37,12 +38,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+      name='ReservationScreen'
+      options={{
+        title:'Reservation',
+        tabBarIcon:()=><Ionicons name='calendar' color={'#0959e4'} size={24} />
+      }}
+      />
+      <Tabs.Screen
       name='Notifications'
       options={{
         title:'Notifications',
         tabBarIcon:()=><Ionicons name='notifications' color={'#0959e4'} size={24} />
       }}
       />
+    
     </Tabs>
   );
 }

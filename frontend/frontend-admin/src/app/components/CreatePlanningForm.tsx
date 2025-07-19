@@ -1,80 +1,104 @@
 "use client"
 
-import { useState } from "react"
-
-// Supposons que cette interface est définie quelque part,
-// ou que vous l'importez si elle vient d'un fichier de types partagé.
-// Elle reflète la structure attendue par PlanningRequest en Java.
-interface PlanningRequest {
-    date: string; // LocalDate
-    heureDebut: string; // LocalTime
-    heureFin: string; // LocalTime
-    cours: string;
-    proprietaireFiliere: string;
-    proprietaireNiveau: string; // Ou number si votre backend le gère comme un Long pur, mais string est plus flexible pour "L1", "M2" etc.
-    salleId: number; // Long
-}
+import { useEffect, useState } from "react"
+import { getSalleDeClasse, createStatiquePlanning, StatiquePlanningRequest, SalleDeClasse } from "../api/apiServices";
 
 export default function CreatePlanningForm({ visible }: { visible: boolean }) {
-    // Initialiser formData avec les noms de champs qui correspondent à PlanningRequest en Java
-    const [formData, setFormData] = useState<PlanningRequest>({
-        date: "",
+    const getCurrentDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // REMOVED: getCurrentDayOfWeek() n'est plus utilisé pour pré-remplir 'jours'
+
+    const [formData, setFormData] = useState<StatiquePlanningRequest>({
+        jours: "", // <-- NE PRÉ-REMPLIT PLUS le jour courant, l'utilisateur doit choisir
+        date: getCurrentDate(), // <-- PRÉ-REMPLI avec la date courante
         heureDebut: "",
         heureFin: "",
-        cours: "", // Nouveau champ
-        proprietaireFiliere: "Informatique", // Valeur par défaut
-        proprietaireNiveau: "L1", // Valeur par défaut
-        salleId: 0, // Valeur par défaut (à remplacer par un ID de salle réel)
+        coursPrevu: "",
+        proprietaireFiliere: "Informatique",
+        proprietaireNiveau: "L1",
+        salleReserver: 0, // Initialisé à 0 (aucun ID sélectionné)
+        adminId: 1,       // <-- GÉRÉ AUTOMATIQUEMENT : ID d'admin par défaut.
+                          // EN PRODUCTION: Cet ID devrait venir de la session de l'utilisateur authentifié (ex: depuis le token JWT).
     });
+
+    const [salles, setSalles] = useState<SalleDeClasse[]>([]); // Toutes les salles de classe
+    const [loadingSalles, setLoadingSalles] = useState(true); // État de chargement des salles
+    const [errorSalles, setErrorSalles] = useState<string | null>(null); // Erreur lors du chargement des salles
+
+
+    // Effet pour charger les salles au montage du composant
+    useEffect(() => {
+        const fetchSalles = async () => {
+            setLoadingSalles(true);
+            setErrorSalles(null);
+            try {
+                const data = await getSalleDeClasse(); // getSalleDeClasse est déjà typé dans apiServices
+                setSalles(data);
+                // Si des salles sont disponibles, définissez la première comme valeur par défaut
+                if (data.length > 0) {
+                    setFormData(prev => ({ ...prev, salleReserver: data[0].id })); // Met à jour salleReserver avec l'ID de la première salle
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération des salles :", err);
+                setErrorSalles("Impossible de charger les salles. Veuillez réessayer.");
+            } finally {
+                setLoadingSalles(false);
+            }
+        };
+        fetchSalles();
+    }, []);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        const { name, value, type } = e.target;
-        // Gérer spécifiquement les types numériques si nécessaire
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: type === "number" ? parseFloat(value) : value,
+            // Convertit en nombre si le champ est 'salleReserver' (adminId n'est plus un input)
+            [name]: (name === "salleReserver") ? Number(value) : value,
         }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault(); // Empêche le rechargement de la page par défaut
+        e.preventDefault();
 
-        // Ici, vous auriez besoin d'obtenir le token d'authentification.
-        // Pour cet exemple, je vais utiliser un token factice.
-        // En production, il viendrait de votre système d'authentification (ex: Context API, Redux, localStorage).
-        const authToken = localStorage.getItem("authToken") || "Bearer votre_token_admin_ici"; // REMPLACER PAR LE VRAI TOKEN
+        // Validation simple pour s'assurer qu'une salle a été sélectionnée (par ID)
+        if (formData.salleReserver === 0) {
+            alert("Veuillez sélectionner une salle.");
+            return;
+        }
+        // Validation pour le champ 'jours' qui n'est plus pré-rempli
+        if (!formData.jours) {
+            alert("Veuillez sélectionner un jour de la semaine.");
+            return;
+        }
+        // REMOVED: Validation pour l'ID Admin, car il n'est plus entré par l'utilisateur.
 
         try {
-            const response = await fetch("/api/admin/planning", { // Assurez-vous que le chemin est correct
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": authToken,
-                },
-                body: JSON.stringify(formData), // Convertir l'objet formData en JSON
-            });
+            const savedPlanning = await createStatiquePlanning(formData); // Envoie formData tel quel
 
-            if (response.ok) {
-                alert("Planning ajouté avec succès !");
-                // Réinitialiser le formulaire après succès
-                setFormData({
-                    date: "",
-                    heureDebut: "",
-                    heureFin: "",
-                    cours: "",
-                    proprietaireFiliere: "Informatique",
-                    proprietaireNiveau: "L1",
-                    salleId: 0,
-                });
-            } else {
-                const errorData = await response.json();
-                alert(`Erreur lors de l'ajout du planning: ${errorData.message || response.statusText}`);
-            }
-        } catch (error) {
+            alert("Planning ajouté avec succès !");
+            // Réinitialisation du formulaire après succès
+            setFormData({
+                jours: "", // <-- Réinitialise à vide pour que l'utilisateur choisisse
+                date: getCurrentDate(), // <-- Réinitialise à la date courante non modifiable
+                heureDebut: "",
+                heureFin: "",
+                coursPrevu: "",
+                proprietaireFiliere: "Informatique",
+                proprietaireNiveau: "L1",
+                salleReserver: salles.length > 0 ? salles[0].id : 0, // Réinitialise avec l'ID de la 1ère salle ou 0
+                adminId: 1, // <-- Réinitialise l'adminId à sa valeur par défaut automatique
+            });
+        } catch (error: any) {
             console.error("Erreur de soumission du planning:", error);
-            alert("Une erreur inattendue est survenue.");
+            alert(`Erreur lors de l'ajout du planning: ${error.message || "Une erreur inattendue est survenue."}`);
         }
     };
 
@@ -90,16 +114,38 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Date */}
+                    {/* Jour de la semaine (select) */}
                     <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                        <input
-                            type="date"
-                            name="date" // Nom du champ correspondant à Java
-                            id="date"
-                            value={formData.date}
+                        <label htmlFor="jours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jour de la semaine</label>
+                        <select
+                            name="jours" // <-- Le nom du champ est "jours"
+                            id="jours"
+                            value={formData.jours}
                             onChange={handleChange}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required
+                        >
+                            <option value="">Sélectionnez un jour</option> {/* Option par défaut vide */}
+                            <option value="Lundi">Lundi</option>
+                            <option value="Mardi">Mardi</option>
+                            <option value="Mercredi">Mercredi</option>
+                            <option value="Jeudi">Jeudi</option>
+                            <option value="Vendredi">Vendredi</option>
+                            <option value="Samedi">Samedi</option>
+                            <option value="Dimanche">Dimanche</option>
+                        </select>
+                    </div>
+
+                    {/* Date (input date, pré-rempli et NON MODIFIABLE) */}
+                    <div>
+                        <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date spécifique</label>
+                        <input
+                            type="date"
+                            name="date"
+                            id="date"
+                            value={formData.date}
+                            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-not-allowed"
+                            readOnly 
                             required
                         />
                     </div>
@@ -110,7 +156,7 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                             <label htmlFor="heureDebut" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heure de début</label>
                             <input
                                 type="time"
-                                name="heureDebut" // Nom du champ correspondant à Java
+                                name="heureDebut"
                                 id="heureDebut"
                                 value={formData.heureDebut}
                                 onChange={handleChange}
@@ -122,7 +168,7 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                             <label htmlFor="heureFin" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heure de fin</label>
                             <input
                                 type="time"
-                                name="heureFin" // Nom du champ correspondant à Java
+                                name="heureFin"
                                 id="heureFin"
                                 value={formData.heureFin}
                                 onChange={handleChange}
@@ -134,12 +180,12 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
 
                     {/* Cours */}
                     <div>
-                        <label htmlFor="cours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du Cours</label>
+                        <label htmlFor="coursPrevu" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du Cours</label>
                         <input
                             type="text"
-                            name="cours" // Nouveau champ correspondant à Java
-                            id="cours"
-                            value={formData.cours}
+                            name="coursPrevu"
+                            id="coursPrevu"
+                            value={formData.coursPrevu}
                             onChange={handleChange}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             placeholder="Ex: Introduction à l'Informatique"
@@ -147,27 +193,37 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                         />
                     </div>
 
-                    {/* Salle ID */}
+                    {/* Sélecteur de Salle (envoie l'ID) */}
                     <div>
-                        <label htmlFor="salleId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID de la Salle</label>
-                        <input
-                            type="number" // Type numérique pour l'ID
-                            name="salleId" // Nom du champ correspondant à Java
-                            id="salleId"
-                            value={formData.salleId === 0 ? '' : formData.salleId} // Afficher vide si 0
+                        <label htmlFor="salleReserver" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom de la Salle</label>
+                        <select
+                            name="salleReserver"
+                            id="salleReserver"
+                            value={formData.salleReserver}
                             onChange={handleChange}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Ex: 101"
-                            min={1}
                             required
-                        />
+                            disabled={loadingSalles}
+                        >
+                            {loadingSalles && <option value="">Chargement des salles...</option>}
+                            {errorSalles && <option value="">{errorSalles}</option>}
+                            {!loadingSalles && salles.length === 0 && <option value="">Aucune salle disponible</option>}
+                            {/* Option par défaut pour forcer la sélection si aucune salle n'est pré-sélectionnée */}
+                            {!loadingSalles && salles.length > 0 && formData.salleReserver === 0 && (
+                                <option value="" disabled>Sélectionnez une salle</option>
+                            )}
+                            {salles.map((salle) => (
+                                <option key={salle.id} value={salle.id}>
+                                    {salle.nom}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-
                     {/* Filière */}
                     <div>
                         <label htmlFor="proprietaireFiliere" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filière</label>
                         <select
-                            name="proprietaireFiliere" // Nom du champ correspondant à Java
+                            name="proprietaireFiliere"
                             id="proprietaireFiliere"
                             value={formData.proprietaireFiliere}
                             onChange={handleChange}
@@ -189,7 +245,7 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                     <div>
                         <label htmlFor="proprietaireNiveau" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Niveau</label>
                         <select
-                            name="proprietaireNiveau" // Nom du champ correspondant à Java
+                            name="proprietaireNiveau"
                             id="proprietaireNiveau"
                             value={formData.proprietaireNiveau}
                             onChange={handleChange}
@@ -201,7 +257,7 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                             <option value="L3">L3</option>
                             <option value="M1">M1</option>
                             <option value="M2">M2</option>
-                            <option value="D1">D1</option> {/* Exemple de niveaux de doctorat */}
+                            <option value="D1">D1</option>
                             <option value="D2">D2</option>
                             <option value="D3">D3</option>
                         </select>
@@ -213,14 +269,23 @@ export default function CreatePlanningForm({ visible }: { visible: boolean }) {
                     >
                         Enregistrer le planning
                     </button>
-                    {/* Un bouton "Annuler" peut être ajouté si nécessaire, pour réinitialiser le formulaire ou masquer la modale */}
-                    {/* <button
+                    <button
                         type="reset"
-                        onClick={() => setFormData({ date: "", heureDebut: "", heureFin: "", cours: "", proprietaireFiliere: "Informatique", proprietaireNiveau: "L1", salleId: 0 })}
+                        onClick={() => setFormData({
+                            jours: "", // Réinitialise à vide
+                            date: getCurrentDate(), // Réinitialise à la date courante non modifiable
+                            heureDebut: "",
+                            heureFin: "",
+                            coursPrevu: "",
+                            proprietaireFiliere: "Informatique",
+                            proprietaireNiveau: "L1",
+                            salleReserver: salles.length > 0 ? salles[0].id : 0, // Réinitialise à l'ID de la première salle ou 0
+                            adminId: 1 // Réinitialise l'adminId à sa valeur par défaut
+                        })}
                         className="mt-2 w-full p-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition-colors duration-200"
                     >
                         Annuler
-                    </button> */}
+                    </button>
                 </form>
             </div>
         </div>

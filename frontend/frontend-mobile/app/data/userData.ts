@@ -1,22 +1,28 @@
 export interface user{
     id:number,
-    nom:string,
-    prenom:string,
+    lastname:string,
+    firstname:string,
     username:string,
     email:string,
     niveau:string,
     filiere:string,
-    password:string,
+    roleName:string,
+    status:string,
+    enabeled:boolean
+
+    
 }
 export const userExample : user ={
     id: 1,
-    nom: "Njiki",
-    prenom: "James",
+    lastname: "Njiki",
+    firstname: "James",
     username: "Jameski",
     email: "Jameski@gmail.com",
     niveau: "L3",
     filiere: "Informatique",
-    password: "Passe1234"
+    roleName: "Delegue",
+    status: "Actif",
+    enabeled: false
 }
 export const initialData = [
     { id: '1', niveau: 'L3', filiere: 'Chimie', heureDeb: '09:00',heureFin:'10:00', status: 'RESERVEE' },

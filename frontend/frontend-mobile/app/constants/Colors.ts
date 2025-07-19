@@ -23,4 +23,17 @@ export const Colors = {
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
   },
+  primary: '#0959e4', 
+  secondary: '#3498DB',
+  
+  background: '#ffffff', 
+  cardBackground: '#FFFFFF',
+  
+  textPrimary: '#34495E',
+  textSecondary: '#7F8C8D',
+  status: {
+    libre: '#2ECC71',
+    reservee: '#F39C12',
+    occupee: '#E74C3C',
+  },
 };

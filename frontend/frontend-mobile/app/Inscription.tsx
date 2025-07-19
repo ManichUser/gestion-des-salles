@@ -9,9 +9,11 @@ export default function Inscription() {
     "Informatique", "Mathématique", "Chimie", "Physique",
     "Biochimie", "Biologie Animale", "Biologie Végétale", "Sciences de la Terre"
   ];
+  const Niveau=["L1","L2","L3","M1","M2"]
 
   const [step, setStep] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [menuNiveauVisible, setMenuNiveauVisible] = useState(false);
   const [user, setUser] = useState({
     lastname: '',
     firstname: '',
@@ -30,8 +32,6 @@ export default function Inscription() {
     if (step > 1) setStep(step - 1);
   };
   const handleRegister = async () => {
-    const niveauNum = parseInt(user.niveau);
-    if (niveauNum >= 1 && niveauNum <= 5) {
       try {
         await registerUser(user);
         Alert.alert("Succès", "Inscription réussie !");
@@ -39,9 +39,7 @@ export default function Inscription() {
       } catch (error) {
         Alert.alert("Erreur", "L'inscription a échoué.");
       }
-    } else {
-      Alert.alert("Erreur", "Le niveau doit être entre 1 et 5.");
-    }
+    
   };
   
 
@@ -104,13 +102,36 @@ export default function Inscription() {
             ))}
           </Menu>
 
-          <TextInput
+          {/* <TextInput
             style={styles.input}
-            placeholder="Niveau (1 à 5)"
-            keyboardType="numeric"
+            placeholder="Niveau (L1 à M2)"
+            keyboardType="default"
             value={user.niveau}
             onChangeText={text => setUser({ ...user, niveau: text })}
-          />
+          /> */}
+          <Menu
+            visible={menuNiveauVisible}
+            onDismiss={() => setMenuNiveauVisible(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                onPress={() => setMenuNiveauVisible(true)}
+                style={styles.menuButton}
+              >
+                {user.niveau || "Sélectionner votre Niveau"}
+              </Button>
+            }>
+            {Niveau.map((niveau, index) => (
+              <Menu.Item
+                key={index}
+                onPress={() => {
+                  setUser({ ...user, niveau });
+                  setMenuNiveauVisible(false);
+                }}
+                title={niveau}
+              />
+            ))}
+          </Menu>
         </>
         )}
 

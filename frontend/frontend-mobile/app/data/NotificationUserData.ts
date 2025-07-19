@@ -45,7 +45,7 @@ export const sampleNotifData:Notification[]=[
         id: "n3",
         title: "Important",
         idSender: "SYSTEM",
-        description: "Resercation de la salle A pour votre cours le [date, horaire]",
+        description: "Reservation de la salle A pour votre cours le [date, horaire]",
         type: "PASSIF",
         idReceive: ["1", "2"],
         statusNotification: [

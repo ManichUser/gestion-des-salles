@@ -1,6 +1,6 @@
 package com.example.authentification_test.service;
 
-import com.example.authentification_test.respository.UserRespository;
+import com.example.authentification_test.respository.UserRepository;
 import com.example.authentification_test.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    private  final UserRespository userRespository;
+    private  final UserRepository userRespository;
 
 
     @Override

@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getSalleDeClasse } from '../services/authService';
+
+import { getSalleDeClasse } from '../services/classRoomService';
 import { userExample } from '../data/userData';
 import { useSearchParams } from 'expo-router/build/hooks';
+import { Salle } from '../screens/RoomsListScreen';
 
 export default function HomePage() {
-  const  user :string | null =  userExample.username || useSearchParams().get("user") ;
-  const router = useRouter();
+  const  user :string | null =  useSearchParams().get("user")||userExample.username  ;
+
   const [salles, setSalles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSalles = async () => {
       try {
-        const data = await getSalleDeClasse();
+        const data: Salle[] =  await getSalleDeClasse();
         setSalles(data);
       } catch (err) {
         console.error("Erreur lors de la récupération des salles :", err);
@@ -46,12 +47,12 @@ export default function HomePage() {
         <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 50 }} />
       ) : (
         <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
-          {(salles as { id: number; nom: string; status: string }[])
-            .filter(salle => salle.status === 'LIBRE')
+          {(salles as { id: number; nom: string; statut: string }[])
+            .filter(salle => salle.statut.toUpperCase() === 'LIBRE')
             .map((salle) => (
               <TouchableOpacity key={salle.id} style={styles.roomCard}>
                 <Text style={styles.roomName}>{salle.nom}</Text>
-                <Text style={styles.status}>{salle.status}</Text>
+                <Text style={styles.status}>{salle.statut}</Text>
               </TouchableOpacity>
             ))}
         </ScrollView>
