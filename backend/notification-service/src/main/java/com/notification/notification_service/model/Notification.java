@@ -38,8 +38,8 @@ public class Notification {
         // Initialisation automatique des statuts à "Non Lue" pour chaque destinataire
         if (destinataireId != null) {
             this.statutNotification = destinataireId.stream()
-                                         .map(id -> new StatutNotification(id, "Non Lue"))
-                                         .collect(Collectors.toList());
+                                        .map(id -> new StatutNotification(id, "Non Lue"))
+                                        .collect(Collectors.toList());
         }
     }
 

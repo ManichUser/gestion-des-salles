@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { View,Text, TouchableOpacity,StyleSheet } from "react-native";
 import { sampleNotifData } from "../data/NotificationUserData";
+import { useState } from "react";
 
 
 export default function NotificationScreen(){

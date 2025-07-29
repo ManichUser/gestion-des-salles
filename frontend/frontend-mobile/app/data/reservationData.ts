@@ -42,16 +42,18 @@ export function filterByHeure(debut: string, fin: string, data: reservationData[
 export function filterByFiliere(filiere: string, data: reservationData[]) {
     return data.filter(res => res.proprietaireFiliere === filiere);
 }
-export function filterByFiliereEtNiveau(filiere: string, niveau: string, data: reservationData[]) {
+export function filterByFiliereEtNiveau(filiere: string|undefined, niveau: string|undefined, data: reservationData[]) {
+
     return data.filter(res =>
-      res.proprietaireFiliere === filiere && res.proprietaireNiveau === niveau
+      res.proprietaireFiliere.toLowerCase() === filiere?.toLowerCase() &&
+      res.proprietaireNiveau.toLowerCase() === niveau?.toLowerCase()
     );
 }
 export function filterByCours(cours: string, data: reservationData[]) {
     return data.filter(res => res.coursPrevu.toLowerCase().includes(cours.toLowerCase()));
   }
-    export function filterByDelegueId(delegueId: string, data: reservationData[]) {
-    return data.filter(res => res.delegueId === delegueId);
+    export function filterByDelegueId(delegueId: string|undefined, data: reservationData[]) {
+    return data.filter(res => res.delegueId.toString() === delegueId);
   }
   
 export function filtreAvance(options: {
@@ -68,7 +70,7 @@ export function filtreAvance(options: {
     );
   }
 
-  export function isSalleOccupee(
+  export function isSalleReserver(
     salle: string,
     date: string,
     heureDebut: string,
@@ -105,14 +107,14 @@ export function filtreAvance(options: {
   }
   export function isChevauchementHoraire(
     date: string,
-    cours: string,
+  
     heureDebut: string,
     heureFin: string,
     data: reservationData[]
   ): boolean {
     return data.some(res =>
       res.date === date &&
-      res.coursPrevu === cours &&
+      
       (
         (heureDebut >= res.heureDebut && heureDebut < res.heureFin) ||
         (heureFin > res.heureDebut && heureFin <= res.heureFin) ||
@@ -122,8 +124,8 @@ export function filtreAvance(options: {
   }
     
 //planningstatique methode
-export function filterPlanningBySalle(salle: string, data: StatiquePlanningResponse[]) {
-    return data.filter(plan => plan.salleReserver === salle);
+export function filterPlanningBySalle(salleId: string, data: StatiquePlanningResponse[]) {
+    return data.filter(plan => plan.salleReserver.toString() === salleId);
   }
   
   export function filterPlanningByDate(date: string, data: StatiquePlanningResponse[]) {
@@ -157,8 +159,16 @@ export function filterPlanningBySalle(salle: string, data: StatiquePlanningRespo
     );
   }
   
-  export function filterPlanningByAdmin(adminId: number, data: StatiquePlanningResponse[]) {
-    return data.filter(plan => plan.adminId === adminId);
+  export function findProprietaireNiveaProprietairefiliereForHorraire( 
+    date: string,
+    heureDebut: string,
+    heureFin: string, 
+    data: StatiquePlanningResponse[]):{filiere:string|undefined,niveau:string|undefined} {
+
+    const jour=getDayOfWeek(date)
+    const elt=data.find(plan=>plan.jours===jour && plan.heureDebut==heureDebut&&plan.heureFin===heureFin)
+    return {filiere:elt?.proprietaireFiliere,niveau:elt?.proprietaireNiveau}
+  
   }
   
   export function filtreAvancePlanning(options: {
@@ -177,20 +187,20 @@ export function filterPlanningBySalle(salle: string, data: StatiquePlanningRespo
     );
   }
 
-  export function isSalleStatiqueOccupee(
+  export function isEcheanceStatiqueLibre(
     salle:string,
     date: string,
     heureDebut: string,
     heureFin: string,
     data: StatiquePlanningResponse[]
   ): boolean {
-    return data.some(plan =>
+    const jour =getDayOfWeek(date)
+    return data.every(plan =>
       plan.salleReserver === salle &&
-      plan.date === date &&
+      plan.jours === jour &&
       (
-        (heureDebut >= plan.heureDebut && heureDebut < plan.heureFin) ||
-        (heureFin > plan.heureDebut && heureFin <= plan.heureFin) ||
-        (heureDebut <= plan.heureDebut && heureFin >= plan.heureFin)
+        (heureDebut != plan.heureDebut ) &&
+        (heureFin !=plan.heureFin ) 
       )
     );
   }
@@ -205,14 +215,14 @@ export function filterPlanningBySalle(salle: string, data: StatiquePlanningRespo
   
   export function isChevauchementStatiqueHoraire(
     date: string,
-    cours: string,
     heureDebut: string,
     heureFin: string,
     data: StatiquePlanningResponse[]
   ): boolean {
+    const jour=getDayOfWeek(date)
     return data.some(plan =>
-      plan.date === date &&
-      plan.coursPrevu === cours &&
+      plan.jours === jour &&
+
       (
         (heureDebut >= plan.heureDebut && heureDebut < plan.heureFin) ||
         (heureFin > plan.heureDebut && heureFin <= plan.heureFin) ||
@@ -220,4 +230,26 @@ export function filterPlanningBySalle(salle: string, data: StatiquePlanningRespo
       )
     );
   }
-  
+  export const days=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']
+  export function getDayOfWeek(isoDate: string | number | Date){
+    const date=new Date(isoDate);
+    return days[date.getDay()]
+  }
+
+  export function isDefaultOwner(
+    date: string,
+    heureDebut: string,
+    heureFin: string,
+    filiere:string,
+    niveau:string,
+    data:StatiquePlanningResponse[]
+  ):boolean{
+    const jour=getDayOfWeek(date)
+    return data.some(plan=>
+      plan.jours===jour&&
+      plan.heureDebut<=heureDebut &&
+      plan.heureFin >=heureFin &&
+      plan.proprietaireFiliere===filiere &&
+      plan.proprietaireNiveau===niveau
+    )
+  }

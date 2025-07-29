@@ -1,51 +1,35 @@
-// ReservationScreen.js
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 
-// Données statiques de réservation pour un délégué
-const initialReservations = [
-  {
-    id: '1',
-    salle: 'Amphi 351 Campus A',
-    date: '2025-07-20',
-    heureDebut: '09:00',
-    heureFin: '11:00',
-    statut: 'Confirmée', // Confirmée, Annulée, Occupée
-    motif: 'Cours de Maths',
-  },
-  {
-    id: '2',
-    salle: 'Salle BI-1 Campus A',
-    date: '2025-07-21',
-    heureDebut: '14:00',
-    heureFin: '16:00',
-    statut: 'Confirmée',
-    motif: 'TD de Physique',
-  },
-  {
-    id: '3',
-    salle: 'Amphi 600 Campus C',
-    date: '2025-07-22',
-    heureDebut: '10:00',
-    heureFin: '12:00',
-    statut: 'Annulée',
-    motif: 'Réunion annulée',
-  },
-  {
-    id: '4',
-    salle: 'Salle NS3 Campus C',
-    date: '2025-07-23',
-    heureDebut: '08:00',
-    heureFin: '10:00',
-    statut: 'Occupée',
-    motif: 'Examen',
-  },
-];
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import {  filterByFiliereEtNiveau, reservationData } from '../data/reservationData';
+import { user } from '../data/userData';
+import { cancelReservation, getReservations } from '../services/reservationService';
+import { getAuthenticatedUser } from '../services/authService';
+
 
 export default function ReservationScreen() {
-  const [reservations, setReservations] = useState(initialReservations);
+  const [reservations, setReservations] = useState<reservationData[]>([]);
+  const [user,setUser]=useState<user>()
+  const [loading, setLoading] = useState(true);
 
-  const handleCancelReservation = (id: string) => {
+  useEffect(() => {
+    const fetchPlannings = async () => {
+        try {
+            const data: reservationData[] = await getReservations();
+            const authenticatedUser: user = await getAuthenticatedUser(); 
+            setUser(authenticatedUser);
+            const filteredReservation=filterByFiliereEtNiveau(authenticatedUser?.filiere,authenticatedUser?.niveau,data)
+            setReservations(filteredReservation);
+        } catch (err) {
+            console.log('Erreur lors de la recuperation des reservations', err);
+        }finally{
+            setLoading(false)
+        }
+    };
+    fetchPlannings();
+}, []);
+
+  const handleCancelReservation = (id: number) => {
     Alert.alert(
       "Annuler la réservation",
       "Êtes-vous sûr de vouloir annuler cette réservation ?",
@@ -56,13 +40,13 @@ export default function ReservationScreen() {
         },
         {
           text: "Oui",
-          onPress: () => {
-            setReservations(prevReservations =>
-              prevReservations.map(res =>
-                res.id === id ? { ...res, statut: 'Annulée' } : res
-              )
-            );
+          onPress: async () => {
+            
+          const cancel =await cancelReservation(id);
+          console.log(cancel)
             Alert.alert("Succès", "Réservation annulée.");
+            const data: reservationData[] = await getReservations();
+            setReservations(data)
           }
         }
       ]
@@ -83,7 +67,7 @@ export default function ReservationScreen() {
           onPress: () => {
             setReservations(prevReservations =>
               prevReservations.map(res =>
-                res.id === id ? { ...res, statut: 'Occupée' } : res
+                res.id.toString() === id ? { ...res, statut: 'Occupée' } : res
               )
             );
             Alert.alert("Succès", "Salle marquée comme occupée.");
@@ -93,16 +77,14 @@ export default function ReservationScreen() {
     );
   };
 
-const renderReservationItem = ({ item }: { item: { id: string; salle: string; date: string; heureDebut: string; heureFin: string; statut: string; motif: string; } }) => (
+const renderReservationItem = ({ item }: { item: reservationData }) => (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.salle}</Text>
+      <Text style={styles.cardTitle}>{item.salleReserver}</Text>
       <Text>Date: {item.date}</Text>
       <Text>Heure: {item.heureDebut} - {item.heureFin}</Text>
-      <Text>Motif: {item.motif}</Text>
-    <Text style={[styles.statusText, styles[`status_${item.statut as 'confirmée' | 'annulée' | 'occupée'}`]]}>
-        Statut: {item.statut}
-    </Text>
-      {item.statut === 'Confirmée' && ( // N'afficher les boutons que si la réservation est confirmée
+      <Text>Motif: {item.coursPrevu}</Text>
+  
+      {user?.roleName === 'DELEGUE' && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.cancelButton]}
@@ -112,7 +94,7 @@ const renderReservationItem = ({ item }: { item: { id: string; salle: string; da
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, styles.occupiedButton]}
-            onPress={() => handleSetOccupied(item.id)}
+            onPress={() => handleSetOccupied(item.id.toString())}
           >
             <Text style={styles.buttonText}>Mettre la salle comme occupée</Text>
           </TouchableOpacity>
@@ -124,16 +106,17 @@ const renderReservationItem = ({ item }: { item: { id: string; salle: string; da
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Mes Réservations</Text>
-      {reservations.length === 0 ? (
+      {loading?(<ActivityIndicator color="#2563eb" style={{ marginTop: 50 }} size={40}/>)
+      :(reservations.length === 0 ? (
         <Text style={styles.noReservationsText}>Vous n'avez aucune réservation.</Text>
       ) : (
         <FlatList
           data={reservations}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderReservationItem}
           contentContainerStyle={styles.listContent}
         />
-      )}
+      ))}
     </View>
   );
 }
@@ -199,15 +182,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   cancelButton: {
-    backgroundColor: '#dc3545', // Rouge pour annuler
+    backgroundColor: '#dc3545', 
   },
   occupiedButton: {
-    backgroundColor: '#ffc107', // Jaune/Orange pour occuper
+    backgroundColor: '#0959e4', 
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 12, // Taille de police légèrement réduite pour s'adapter
+    fontSize: 12, 
   },
   noReservationsText: {
     fontSize: 18,

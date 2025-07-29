@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/notifications")
+@CrossOrigin(origins="*")
 public class NotificationController {
 
     @Autowired

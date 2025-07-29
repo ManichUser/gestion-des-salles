@@ -42,11 +42,13 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/logout",
                                 "/api/auth/refresh", // Permettre le refresh token aussi
-                                "/api/auth/forgot-password", // Permettre l'accès à ces endpoints
-                                "/api/auth/reset-password",  // sans authentification
-                                "/api/classrooms/**",        // Si vos endpoints de salles sont publics
-                                "/api/statiqueplannings/**"  // Si vos endpoints de plannings sont publics
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password", 
+                                "/api/classrooms/**", 
+                                "/api/statiqueplannings/**",
+                                "/api/auth/delegue/**"  
                         ).permitAll()
+                        .requestMatchers("/api/auth/users/same-filiere-niveau/**").permitAll()
                         .requestMatchers("/api/auth/role/**", "/api/auth/statut/**", "/api/auth/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

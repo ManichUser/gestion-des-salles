@@ -2,7 +2,8 @@ import axios from 'axios';
 import api from './api'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AUTH_API_URL = "http://192.168.137.135:8081"; 
+
+const AUTH_API_URL = "http://192.168.43.187:8081"; 
 
 
 export const registerUser = async (user: { lastname: string; firstname: string; username: string; email: string; password: string; filiere: string; niveau: string; }) => { // user: { firstName, lastName, email, password, role }
@@ -17,6 +18,10 @@ export const loginUser = async ({ email, password }: { email: string; password: 
   await AsyncStorage.setItem('refreshToken', response.data.refreshToken); 
   return response.data;
 };
+export const getListDelegue= async()=>{
+  const response=await api.get('/auth/delegue')
+  return response.data
+}
 
 export const getAuthenticatedUser = async () => {
   const token = await AsyncStorage.getItem('token');
@@ -26,11 +31,21 @@ export const getAuthenticatedUser = async () => {
   const response = await api.get('/auth/me'); 
   return response.data;
 };
+export const getUserIdsSameFiliereAndNiveau = async (idUser:number): Promise<number[]> => {
+  try {
+    const response = await axios.get<number[]>(`${AUTH_API_URL}/api/auth/users/same-filiere-niveau/${idUser}`);
+
+    return response.data; 
+  } catch (error) {
+    console.error('Erreur lors de la récupération des IDs utilisateurs :', error);
+    throw error;
+  }
+};
 
 export const logoutUser = async () => {
   const token = await AsyncStorage.getItem('token');
   if (!token) {
-    // Si pas de token, l'utilisateur est déjà déconnecté (ou n'était pas connecté)
+
     console.warn("Attempted to logout but no token was found.");
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('refreshToken');
@@ -42,7 +57,7 @@ export const logoutUser = async () => {
     await api.post('/auth/logout', {});
   } catch (error) {
     console.error("Error during logout API call:", error);
-    // Gérer l'erreur (ex: token expiré sur le serveur) mais effacer quand même le token local
+   
   } finally {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('refreshToken');
@@ -67,7 +82,7 @@ export const forgotPassword = async (email: string) => {
 
 
 
-export const getUsersByStatus = async (status: any) => { // status: string (ex: 'ACTIVE', 'INACTIVE')
+export const getUsersByStatus = async (status: any) => { 
     const response = await api.get(`/auth/users/status/${status}`);
     return response.data;
 };

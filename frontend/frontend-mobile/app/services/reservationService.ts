@@ -3,7 +3,7 @@ import axios from 'axios';
 import { StatiquePlanningResponse, reservationData, reservationRequestData } from '../data/reservationData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_PLANNING_URL = "http://192.168.137.135:8082/api"; 
+const API_PLANNING_URL = "http://192.168.43.187:8082/api"; 
 
 const apiPlanning = axios.create({
     baseURL: API_PLANNING_URL,

@@ -20,10 +20,10 @@ public class Planning {
   
     private LocalDate date;
 
-    @JsonFormat(pattern = "HH:MM")
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime heureDebut;
     
-    @JsonFormat(pattern = "HH:MM")
+    @JsonFormat(pattern = "HH:mm") 
     private LocalTime heureFin;
 
     private String proprietaireFiliere;

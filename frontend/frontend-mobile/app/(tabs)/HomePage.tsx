@@ -6,6 +6,7 @@ import { getSalleDeClasse } from '../services/classRoomService';
 import { userExample } from '../data/userData';
 import { useSearchParams } from 'expo-router/build/hooks';
 import { Salle } from '../screens/RoomsListScreen';
+import { router } from 'expo-router';
 
 export default function HomePage() {
   const  user :string | null =  useSearchParams().get("user")||userExample.username  ;
@@ -36,7 +37,7 @@ export default function HomePage() {
         </View>
         <View style={{ display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center', height: 40 }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold',color:'black' }}>{user}</Text>
-          <Ionicons name='person-sharp' size={24} />
+          <Ionicons onPress={()=>router.push('/profil')} name='person-sharp' size={24} />
         </View>
       </View>
 

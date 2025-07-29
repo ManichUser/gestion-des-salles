@@ -1,7 +1,6 @@
 package com.example.authentification_test.security;
 
 import com.example.authentification_test.service.TokenService;
-import com.example.authentification_test.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

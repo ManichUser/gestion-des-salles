@@ -4,6 +4,7 @@ import com.example.authentification_test.dto.*;
 import com.example.authentification_test.model.Role;
 import com.example.authentification_test.model.Status;
 import com.example.authentification_test.model.User;
+import com.example.authentification_test.respository.RoleRepository;
 import com.example.authentification_test.respository.UserRepository;
 import com.example.authentification_test.service.AdminService;
 import com.example.authentification_test.service.AuthService;
@@ -18,20 +19,23 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
     private final UserRepository userRespository;
+    private final RoleRepository roleRepository;
     private final TokenService tokenService;
     private final AdminService adminService;
     private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService, UserRepository userRespository, TokenService tokenService,AdminService adminService,PasswordResetService passwordResetService) {
+    public AuthController(AuthService authService, UserRepository userRespository,RoleRepository roleRepository, TokenService tokenService,AdminService adminService,PasswordResetService passwordResetService) {
 
         this.authService = authService;
         this.userRespository = userRespository;
+        this.roleRepository=roleRepository;
         this.tokenService = tokenService;
         this.adminService=adminService;
         this.passwordResetService = passwordResetService;
@@ -91,6 +95,7 @@ public class AuthController {
     public ResponseEntity<List<User>> getUsersByRole(@PathVariable Role role){
         return ResponseEntity.ok(userRespository.findByRole(role));
     }
+    
 
     @GetMapping("/users/status/{status}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -134,5 +139,31 @@ public class AuthController {
         passwordResetService.resetPassword(token,newPassword);
         return ResponseEntity.ok("Password reset");
     }
+
+    @GetMapping("/users/same-filiere-niveau/{id}")
+    public ResponseEntity<List<Long>> getUserIdsSameFiliereAndNiveau(@PathVariable Long id) {
+        Optional<User> userOpt = userRespository.findById(id);
+    
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    
+        User user = userOpt.get();
+    
+        if (user.getFiliere() == null || user.getNiveau() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    
+        List<Long> userIds = userRespository.findUserIdsByFiliereAndNiveau(user.getFiliere(), user.getNiveau());
+    
+        return ResponseEntity.ok(userIds);
+    }
+    @GetMapping("/delegue")
+    public List<User> getDelegueOfFiliereAndNiveau(){
+        Optional<Role> optRole=roleRepository.findByName("DELEGUE");
+        List<User> Delegues=userRespository.findByRole(optRole.get());
+        return Delegues;
+    }
+    
 
 }
